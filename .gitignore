@@ -4,3 +4,6 @@
 # Except these files
 !.gitignore
 !README.md
+!docker-compose.yml
+!index.html
+!me.png

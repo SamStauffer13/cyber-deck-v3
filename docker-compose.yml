@@ -1,0 +1,61 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add: [NET_ADMIN]
+    ports: [8080:8080]
+    volumes: [./apps/gluetun:/gluetun]
+    restart: unless-stopped
+    environment:
+      VPN_SERVICE_PROVIDER: private internet access
+      VPN_TYPE: openvpn
+      OPENVPN_USER: ${PIA_USERNAME}
+      OPENVPN_PASSWORD: ${PIA_PASSWORD}
+      SERVER_REGIONS: US Chicago
+      HEALTH_SERVER_ADDRESS: 127.0.0.1:9999
+
+  qbittorrent:
+    image: linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    network_mode: service:gluetun
+    volumes: [./apps/qbittorrent/config:/config, ./downloads:/downloads]
+    restart: unless-stopped
+    environment: {PUID: 1000, PGID: 1000, WEBUI_PORT: 8080, DOCKER_MODS: ghcr.io/themepark-dev/theme.park:qbittorrent, TP_THEME: hotline}
+
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    network_mode: host
+    volumes: [./apps/jellyfin/config:/config, ./apps/jellyfin/cache:/cache, ./movies:/media/movies:ro, ./shows:/media/shows:ro]
+    restart: unless-stopped
+    devices: [/dev/dri:/dev/dri]
+    group_add: [985, 989]
+    environment: {JELLYFIN_PublishedServerUrl: http://localhost:8096}
+
+  filebot:
+    image: jlesage/filebot:latest
+    container_name: filebot
+    ports: [5800:5800]
+    volumes: [./apps/filebot/config:/config, ./downloads:/watch, ./movies:/output/movies, ./shows:/output/shows]
+    restart: unless-stopped
+    environment: {USER_ID: 1000, GROUP_ID: 1000, TZ: America/Chicago, AUTOMATED_CONVERSION_KEEP_SOURCE: 0, AUTOMATED_CONVERSION_OUTPUT_DIR: /output, AMC_ACTION: move, AMC_MOVIE_FORMAT: '{plex.replace("/Movies/", "/movies/")}', AMC_SERIES_FORMAT: '{plex.replace("/Shows/", "/shows/")}'}
+
+  samba:
+    image: dperson/samba:latest
+    container_name: samba
+    ports: [139:139, 445:445]
+    volumes: [./movies:/media/movies, ./shows:/media/shows, ./books:/media/books, ./downloads:/media/downloads]
+    restart: unless-stopped
+    environment: {USERID: 1000, GROUPID: 1000, TZ: America/Chicago}
+    command: '-u "deck;deck" -s "movies;/media/movies;yes;no;no;deck" -s "shows;/media/shows;yes;no;no;deck" -s "books;/media/books;yes;no;no;deck" -s "downloads;/media/downloads;yes;no;no;deck"'
+
+  ffmpeg-vaapi:
+    image: linuxserver/ffmpeg:latest
+    container_name: ffmpeg-vaapi
+    profiles: [transcoding]
+    volumes: [./apps/ffmpeg/watch:/watch, ./apps/ffmpeg/output:/output, ./apps/ffmpeg/scripts:/scripts, ./shows:/storage/shows, ./movies:/storage/movies]
+    devices: [/dev/dri:/dev/dri]
+    group_add: [985, 989]
+    environment: {PUID: 1000, PGID: 1000, TZ: America/Chicago}
+    entrypoint: [/bin/bash, /scripts/auto-transcode.sh]
+    restart: unless-stopped

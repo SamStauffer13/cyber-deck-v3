@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Deck Setup Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 100%);
+        }
+
+        .background-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url('me.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: brightness(0.95);
+        }
+
+        /* Clickable hand area */
+        .hand-hotspot {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            left: calc(50% - 180px);
+            top: calc(50% - 180px);
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .hand-hotspot:hover {
+            background: radial-gradient(circle, rgba(255,0,255,0.3) 0%, rgba(255,0,255,0) 70%);
+            box-shadow: 0 0 30px rgba(255,0,255,0.6);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        /* Hint text */
+        .hint {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff00ff;
+            font-size: 18px;
+            text-align: center;
+            text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+            z-index: 5;
+            animation: fadeInOut 3s infinite;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Title */
+        .title {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ffff;
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+            z-index: 5;
+            letter-spacing: 3px;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 24px;
+                top: 30px;
+            }
+            .hint {
+                font-size: 14px;
+                bottom: 30px;
+            }
+            .hand-hotspot {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
+        /* Hidden download link */
+        #download-link {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="background-image"></div>
+
+        <div class="title">CYBER DECK</div>
+
+        <a id="download-link" href="README.md" download="cyber-deck-setup.md"></a>
+
+        <div class="hand-hotspot" onclick="downloadReadme()" title="Click to download setup guide"></div>
+
+        <div class="hint">Click my hand to download the setup guide</div>
+    </div>
+
+    <script>
+        function downloadReadme() {
+            // Trigger the download
+            document.getElementById('download-link').click();
+
+            // Visual feedback
+            const hotspot = document.querySelector('.hand-hotspot');
+            hotspot.style.background = 'radial-gradient(circle, rgba(0,255,255,0.5) 0%, rgba(0,255,255,0) 70%)';
+            hotspot.style.boxShadow = '0 0 50px rgba(0,255,255,1)';
+
+            setTimeout(() => {
+                hotspot.style.background = '';
+                hotspot.style.boxShadow = '';
+            }, 500);
+        }
+
+        // Add keyboard shortcut (press 'd' to download)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'd' || e.key === 'D') {
+                downloadReadme();
+            }
+        });
+    </script>
+</body>
+</html>
