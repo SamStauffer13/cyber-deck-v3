@@ -59,3 +59,10 @@ services:
     environment: {PUID: 1000, PGID: 1000, TZ: America/Chicago}
     entrypoint: [/bin/bash, /scripts/auto-transcode.sh]
     restart: unless-stopped
+
+  web:
+    image: nginx:alpine
+    container_name: cyber-deck-web
+    ports: [8090:80]
+    volumes: [.:/usr/share/nginx/html:ro]
+    restart: unless-stopped
